@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vue源码简单实现</title>
+    <script src="./src/vue.js"></script>
+</head>
+<body>
+    <div id="app"></div>
+
+    <!-- 测试功能代码 -->
+    <script>
+        // 全局混入测试
+        Vue.mixin({
+            beforeCreate() {
+                console.log("触发hook: 全局混入的beforeCreate!");
+            }
+        })
+
+        // 全局组件yuan使用测试
+        Vue.component("yuan", {
+            props: ["pdata", "pcData"],
+
+            components: {
+                "child-yuan": {
+                    props: ["pcData"],
+                    render(h) {
+                        return h("h2", {
+                            style: {
+                                color: "green",
+                                fontSize: "30px"
+                            }
+                        }, this._v("子孙组件: " + this.pcData));
+                    },
+                    data() {
+                        return {
+                            name: "测试: child-yuan"
+                        }
+                    },
+                    mounted() {
+                        console.log("子孙组件child-yuan mountedHook: 触发")
+                    },
+                    beforeUpdate() {
+                        console.log("子孙组件beforeUpdate: 触发");
+                    },
+                    updated() {
+                        console.log("子孙组件updated: 触发");
+                    }
+                }
+            },
+            render(h) {
+                return h("h1", {
+                    attrs: {
+                        id: "yuan"
+                    },
+                    style: {
+                        color: "blue",
+                        fontSize: "40px"
+                    }
+                }, 
+                [
+                    h("child-yuan", {
+                        props: {
+                            pcData: this.pcData
+                        }
+                    }),
+                    this._v("子组件: " + this.pdata)
+                ]);
+            },
+            mounted() {
+                console.log("子组件yuan mountedHook: 触发")
+            },
+            beforeUpdate() {
+                console.log("子组件beforeUpdate: 触发");
+            },
+            updated() {
+                console.log("子组件updated: 触发");
+            },
+        });
+
+        // 测试样式,未做响应式,可以修改响应式数据,查看其是否被应用
+        var appStyle = {
+            color: "red",
+            fontSize: "50px"
+        };
+
+        // Vue框架测试
+        var app = new Vue({
+                el: "#app",
+
+                // 渲染函数的使用测试 仅支持渲染函数,没compiler
+                render(h) {
+                    return h("div", {
+                        attrs: {
+                            id: "app"
+                        },
+                        style: appStyle,
+                        nativeOn: {
+                            click: this.tagClick
+                        }
+                    }, [
+                        h("yuan", {
+                            on: {
+                                componentClick: this.componentClick
+                            },
+                            props: {
+                                pdata: this.pdata,
+                                pcData: this.pcData
+                            },
+                            hook: {
+                                // 组件管理钩子
+                                init() {
+                                    // console.log(this)
+                                }
+                            }
+                        }),
+
+                        this._v("根组件: " + this.testData)
+                    ])
+                },
+
+                // data的使用测试
+                data() {
+                    return {
+                        life: {
+                            marineLife: {
+                                name: "海豚"
+                            },
+                            aerialCreatures: {
+                                name: "苍鹰"
+                            }
+                        },
+                        people: "刘汇源",
+
+                        // 为子孙组件提供的数据
+                        pcData: "通过修改app的属性pcData,可以修改我",
+                        // 将为子组件提供的数据
+                        pdata: "通过修改app的属性pdata,可以修改我",
+                        // 待测试的响应式数据
+                        testData: "通过修改app的属性testData,可以修改我!"
+                    }
+                },
+
+                // methods的使用测试
+                methods: {
+                    tagClick() {
+                        console.log("根组件点击事件触发!");
+                    },
+                    componentClick() {
+                        console.log("自定义事件触发");
+                    },
+                    peopleChange1() {
+                        console.log("peopleChange1函数触发了!")
+                    },
+                    peopleChange2() {
+                        console.log("peopleChange2函数触发了!")
+                    },
+                    peopleChange3() {
+                        console.log("peopleChange3函数触发了!")
+                    }
+                },
+
+                // 计算属性的使用测试
+                computed: {
+                    authorComputed: {
+                        get() {
+                            return this.people;
+                        }
+                    },  
+                    animalComputed() {
+                        return this.life;
+                    }
+                },
+
+                // 生命周期钩子的使用测试
+                beforeCreate() {
+                    console.log("根组件beforeCreateHook: 触发");
+                },
+                created() {
+                    console.log("根组件createdHook: 触发");
+                },
+                beforeMount() {
+                    console.log("根组件beforeMountHook: 触发");
+                },
+                mounted() {
+                    console.log("根组件 mountedHook: 触发");
+                    setTimeout(() => {
+                        // this.pcData = 121212122;
+                    }, 1000)
+                },
+                beforeUpdate() {
+                    console.log("根组件beforeUpdate: 触发");
+                },
+                updated() {
+                    console.log("根组件updated: 触发");
+                },
+                beforeDestroy() {
+                    console.log("根组件beforeDestroy: 触发");
+                },
+                destroyed() {
+                    console.log("根组件destroyed: 触发");
+                },
+
+                // userWatcher的使用测试
+                watch: {
+                    people: ["peopleChange1", "peopleChange2", "peopleChange3"],
+                    life: {
+                        deep: true,
+                        immediate: true,
+                        handler: function(newVal, oldVal) {
+                            // console.log('新值:', newVal, '旧值:', oldVal);
+                        }
+                    }
+                }
+        });
+    </script>
+</body>
+</html>
