@@ -47,6 +47,12 @@
                     },
                     updated() {
                         console.log("子孙组件updated: 触发");
+                    },
+                    destroyed() {
+                        console.log("子孙组件destroyed: 触发");
+                    },
+                    beforeDestroy() {
+                        console.log("子孙组件beforeDestroy: 触发");
                     }
                 }
             },
@@ -78,6 +84,12 @@
             updated() {
                 console.log("子组件updated: 触发");
             },
+            destroyed() {
+                console.log("子组件destroyed: 触发");
+            },
+            beforeDestroy() {
+                console.log("子组件beforeDestroy: 触发");
+            }
         });
 
         // 测试样式,未做响应式,可以修改响应式数据,查看其是否被应用

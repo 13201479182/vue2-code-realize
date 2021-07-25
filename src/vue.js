@@ -554,23 +554,26 @@
                     vm._watcher = null;
                 }else if (this.lazy) {
                     // 释放_computedWatchers的引用
-                    vm._computedWatchers.forEach(key => {
-                        if (_computedWatchers[key] === this) {
-                            delete _computedWatchers[key];
-                        }
+                    var cWatcher = vm._computedWatchers;
+
+                    Object.keys(cWatcher).forEach(key => {
+                        if (this === cWatcher[key]) {
+                            delete cWatcher[key];
+                        };
                     });
                 };
-                // 释放_watchers的引用
-                vm._watchers.splice(
-                    vm._watchers.indexOf(this),
-                    1
-                )
-
-                // 2>销毁dep对watcher的引用
+               
+                // 1>销毁dep对watcher的引用
                 this.deps.forEach(dep => {
                     dep.removeSub(dep);
                 });
-
+        
+                // 2>释放_watchers的引用
+                vm._watchers.splice(
+                    vm._watchers.indexOf(this),
+                    1
+                );
+                
                 return this;
             }
         }
@@ -733,6 +736,7 @@
 
     function updateChildComponent(vnode) {
         const {componentOptions, componentInstance} = vnode;
+
         // 更新实例来源的vnode
         componentInstance.$vnode = vnode;
         componentInstance.$options._parentVnode = vnode;
@@ -982,7 +986,7 @@
 
         if (vnode.children) {
             vnode.children.forEach(vnode => {
-                invokeDestroyHook(vnode);
+                destroyComponentByVnode(vnode);
             });
         };
     };
@@ -1408,11 +1412,9 @@
                 return;
             }else {
                 // 1> 销毁当前的watchers
-                if (vm._watchers.length) {
-                    vm._watchers.forEach(wathcer => {
-                        wathcer.teardown();
-                    });
-                }; 
+                while(vm._watchers.length) {
+                    vm._watchers[0].teardown();
+                };
 
                 // 2> 销毁全部的自定义事件
                 if (vm._events) {
