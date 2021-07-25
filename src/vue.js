@@ -734,10 +734,10 @@
     function updateChildComponent(vnode) {
         const {componentOptions, componentInstance} = vnode;
         // 更新实例来源的vnode
-        vm.$vnode = vnode;
-        vm.$options._parentVnode = vnode;
-        if (vm._vnode) {
-            vm._vnode.parent = vnode;
+        componentInstance.$vnode = vnode;
+        componentInstance.$options._parentVnode = vnode;
+        if (componentInstance._vnode) {
+            componentInstance._vnode.parent = vnode;
         };
         
         // 更新实例的props属性
